@@ -2,10 +2,10 @@ use std::fs::{self};
 use std::io;
 use std::path::{Component, Path, PathBuf};
 
-fn is_cleanable(dir_path: &Path, artifacts: &[&str]) -> bool {
+fn is_cleanable(dir_path: &Path, artifacts: &[String]) -> bool {
     if let Some(Component::Normal(x)) = dir_path.components().last() {
         if let Some(str_x) = x.to_str() {
-            return artifacts.contains(&str_x);
+            return artifacts.contains(&String::from(str_x));
         };
     }
 
@@ -15,7 +15,7 @@ fn is_cleanable(dir_path: &Path, artifacts: &[&str]) -> bool {
 pub fn find_dirs(
     findings: &mut Vec<PathBuf>,
     dir: &Path,
-    artifacts: &[&str],
+    artifacts: &[String],
     max_depth: i32,
 ) -> io::Result<()> {
     if max_depth == 0 {
@@ -39,6 +39,11 @@ pub fn find_dirs(
     Ok(())
 }
 
+pub fn delete_all_artifact(findings: &Vec<PathBuf>) -> io::Result<()> {
+    println!("Deleting....");
+    todo!()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -49,14 +54,14 @@ mod tests {
     fn run_is_cleanable_flag_found_match() {
         let path_str = "/some/path/artifact_dir_1";
         let test_path = PathBuf::from(path_str);
-        let artifacts = vec!["artifact_dir_1"];
+        let artifacts = vec![String::from("artifact_dir_1")];
         assert!(is_cleanable(&test_path, &artifacts))
     }
 
     #[test]
     fn run_is_cleanable_flag_no_match() {
         let test_path = PathBuf::from("/some/path/artifact_dir_1");
-        let artifacts: Vec<&str> = vec!["artifact_dir_2"];
+        let artifacts = vec![String::from("artifact_dir_2")];
         assert!(!is_cleanable(&test_path, &artifacts))
     }
 
@@ -74,7 +79,7 @@ mod tests {
         fs::create_dir(&artifact_dir_1).expect("Failed to create directory");
         fs::create_dir(&artifact_dir_2).expect("Failed to create directory");
 
-        let artifacts = vec!["artifact"];
+        let artifacts = vec![String::from("artifact")];
         let mut findings: Vec<PathBuf> = Vec::new();
         find_dirs(&mut findings, dir_path, &artifacts, 2).expect("Finding dirs did not work");
 
@@ -94,7 +99,7 @@ mod tests {
             .join("artifact");
         fs::create_dir_all(&sub_dir_path).expect("Failed to create directory");
 
-        let artifacts = vec!["artifact"];
+        let artifacts = vec![String::from("artifact")];
         let mut findings: Vec<PathBuf> = Vec::new();
         find_dirs(&mut findings, dir_path, &artifacts, 2).expect("Finding dirs did not work");
         assert_eq!(findings.len(), 0);
