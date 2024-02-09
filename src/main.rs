@@ -1,5 +1,5 @@
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use artifact_cleaner::{delete_all_artifact, find_dirs};
 use clap::{Parser, ValueEnum};
@@ -26,15 +26,18 @@ impl Config {
     }
 }
 
-/// Tool for cleaning artifacts of programming languages
+/// Tool for cleaning artifacts of programming languages.
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
+    /// Root directory to start the search
     root: std::path::PathBuf,
 
+    /// Cleaner profile. Depeding on the choise different directories can be configured
     #[arg(value_enum)]
     profile: Profile,
 
+    /// If passed, the cleanable directories will be listed but not deleted
     #[arg(short, long)]
     dry_run: bool,
 }
@@ -49,7 +52,7 @@ fn get_config() -> Config {
     if let Some(dir) = user_dir {
         let config_data = fs::read_to_string(dir.home_dir().join(".artifact_cleaner.toml"));
         if let Ok(file) = config_data {
-            toml::from_str(&file).expect("Invalid toml config file")
+            return toml::from_str(&file).expect("Invalid toml config file");
         }
     }
     Config::new()
@@ -70,11 +73,11 @@ fn main() {
         &config.py.artifact_names,
         5,
     ) {
-        Ok(_) => println!("Done"),
-        Err(e) => println!("Error: {:?}", e),
+        Ok(()) => println!("Done"),
+        Err(e) => println!("Error: {e:?}"),
     }
     dbg!(&findings);
-    if findings.len() > 0 && !args.dry_run {
+    if !findings.is_empty() && !args.dry_run {
         delete_all_artifact(&findings).unwrap();
     }
 }

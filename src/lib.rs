@@ -39,7 +39,7 @@ pub fn find_dirs(
     Ok(())
 }
 
-pub fn delete_all_artifact(findings: &Vec<PathBuf>) -> io::Result<()> {
+pub fn delete_all_artifact(findings: &[PathBuf]) -> io::Result<()> {
     println!("Deleting....");
     todo!()
 }
