@@ -1,40 +1,11 @@
-use std::fs;
-use std::io;
-use std::io::Write;
 use std::path::PathBuf;
 
 use artifact_cleaner::cleaning::{delete_all_artifact, find_dirs};
+use artifact_cleaner::{create_config, get_config, get_full_config_path, Config};
 use clap::{Args, Parser, Subcommand, ValueEnum};
-use directories::UserDirs;
-use serde::{Deserialize, Serialize};
+
 use tracing::{debug, error, info, Level};
 use tracing_subscriber::FmtSubscriber;
-
-pub mod cleaning;
-
-#[derive(Serialize, Deserialize, Debug)]
-struct Config {
-    py: ProfileConfig,
-    ignore: Vec<String>,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-struct ProfileConfig {
-    artifact_names: Vec<String>,
-    ignore: Vec<String>,
-}
-
-impl Config {
-    fn new() -> Self {
-        Self {
-            py: ProfileConfig {
-                artifact_names: vec![String::from("__pycache__")],
-                ignore: vec![],
-            },
-            ignore: vec![String::from(".git")],
-        }
-    }
-}
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
@@ -72,36 +43,10 @@ enum Profile {
     Py,
 }
 
-fn get_full_config_path() -> PathBuf {
-    UserDirs::new()
-        .expect("Could not retrieve user directory")
-        .home_dir()
-        .join(".artifact_cleaner.toml")
-}
-
-fn get_config() -> Config {
-    match fs::read_to_string(get_full_config_path()) {
-        Ok(file) => toml::from_str(&file).expect("Invalid toml config file"),
-        Err(_) => Config::new(),
-    }
-}
-
-fn create_config() -> io::Result<()> {
-    let config_path = get_full_config_path();
-    let mut file = fs::File::create(&config_path)?;
-    let deserialized_config = toml::to_string(&Config::new()); // Deal with this error
-    match deserialized_config {
-        Ok(cfg) => file.write_all(cfg.as_bytes())?,
-        Err(e) => return Err(io::Error::new(io::ErrorKind::Other, e)),
-    };
-    info!("Created new default config at {:?}", config_path);
-    Ok(())
-}
-
 fn run_cleaning(args: &RunArgs) -> () {
     info!("Running cleaning in profile {:?}", args.profile);
     info!("Starting from root: {:?}", args.root);
-    let config: Config = get_config();
+    let config: Config = get_config(get_full_config_path());
     debug!("{:#?}", &config);
 
     let profile = match args.profile {
@@ -133,7 +78,7 @@ fn run_cleaning(args: &RunArgs) -> () {
 }
 
 fn run_config_init() -> () {
-    match create_config() {
+    match create_config(get_full_config_path()) {
         Ok(()) => (),
         Err(e) => error!("Default config could not be created: {e}"),
     }
