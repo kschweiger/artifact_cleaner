@@ -3,12 +3,14 @@ use std::io;
 use std::io::Write;
 use std::path::PathBuf;
 
-use artifact_cleaner::{delete_all_artifact, find_dirs};
+use artifact_cleaner::cleaning::{delete_all_artifact, find_dirs};
 use clap::{Args, Parser, Subcommand, ValueEnum};
 use directories::UserDirs;
 use serde::{Deserialize, Serialize};
 use tracing::{debug, error, info, Level};
 use tracing_subscriber::FmtSubscriber;
+
+pub mod cleaning;
 
 #[derive(Serialize, Deserialize, Debug)]
 struct Config {
@@ -90,7 +92,7 @@ fn create_config() -> io::Result<()> {
     let deserialized_config = toml::to_string(&Config::new()); // Deal with this error
     match deserialized_config {
         Ok(cfg) => file.write_all(cfg.as_bytes())?,
-        Err(e) => return Err(io::Error::new(io::ErrorKind::Other, e).into()),
+        Err(e) => return Err(io::Error::new(io::ErrorKind::Other, e)),
     };
     info!("Created new default config at {:?}", config_path);
     Ok(())
@@ -122,17 +124,17 @@ fn run_cleaning(args: &RunArgs) -> () {
         Err(e) => error!("Error: {e:?}"),
     }
     if !findings.is_empty() {
-        if !args.dry_run {
-            delete_all_artifact(&findings).unwrap();
+        if args.dry_run {
+            info!("dry-run set. Found {:#?}", findings);
         } else {
-            info!("dry-run set. Found {:#?}", findings)
+            delete_all_artifact(&findings).unwrap();
         }
     }
 }
 
 fn run_config_init() -> () {
     match create_config() {
-        Ok(_) => (),
+        Ok(()) => (),
         Err(e) => error!("Default config could not be created: {e}"),
     }
 }
