@@ -1,3 +1,6 @@
+//! # Finding and cleaning logic
+//!
+//! Module contianing the code that is used for finding and removing directories
 use std::fs::{self};
 use std::io;
 use std::path::{Component, Path, PathBuf};
@@ -13,6 +16,16 @@ fn dir_name_in_collection(dir_path: &Path, collection: &[String]) -> bool {
     false
 }
 
+/// Find directories name in artifacts and filles passed vector findings
+///
+/// Traverse the filesystem starting from the passed dir. If the element
+/// is a directory and no link, Three things can happend (in the given order):
+/// 1. Is the directory name one of the items in artifacts. In that case, add
+///    the path is added to the findings and continue with the next item.
+/// 2. Is the directory name one of the items in ignore. In that case, continue
+///     with the next item.
+/// 3. Recurively call the function again with the directpry and the max_depth
+///     reduced by one
 #[tracing::instrument(skip_all,parent = None)]
 pub fn find_dirs(
     findings: &mut Vec<PathBuf>,
@@ -45,6 +58,7 @@ pub fn find_dirs(
     Ok(())
 }
 
+/// Delete all passed directores
 pub fn delete_all_artifact(findings: &[PathBuf]) -> io::Result<()> {
     info!("Starting deletion");
     todo!()
