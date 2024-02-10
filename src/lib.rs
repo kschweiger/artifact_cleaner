@@ -11,13 +11,13 @@ use tracing::info;
 
 pub mod cleaning;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct Config {
     pub py: ProfileConfig,
     pub ignore: Vec<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct ProfileConfig {
     pub artifact_names: Vec<String>,
     pub ignore: Vec<String>,
@@ -58,4 +58,62 @@ pub fn create_config(config_path: PathBuf) -> io::Result<()> {
     };
     info!("Created new default config at {:?}", config_path);
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::fs;
+    use tempfile::tempdir;
+
+    #[test]
+    fn new_config_serializable() {
+        let cfg = Config::new();
+        let result = toml::to_string(&cfg);
+        assert!(!result.is_err());
+    }
+
+    #[test]
+    fn create_new_config() {
+        let temp_dir = tempdir().expect("...");
+        let dir_path = temp_dir.path();
+        let config_name = dir_path.join(".artifact_cleaner.toml");
+        let result = create_config(config_name.to_path_buf());
+        assert!(!result.is_err());
+
+        let data = fs::read_to_string(config_name);
+        assert!(!data.is_err());
+    }
+
+    #[test]
+    fn get_config_err_returns_new() {
+        let temp_dir = tempdir().expect("...");
+        let dir_path = temp_dir.path();
+        let config_name = dir_path.join(".artifact_cleaner.toml");
+        let result = get_config(config_name.clone());
+        assert_eq!(result, Config::new());
+
+        // Make sure the file does really not exists
+        let data = fs::read_to_string(config_name);
+        assert!(data.is_err());
+    }
+
+    #[test]
+    fn get_config_from_file() {
+        let temp_dir = tempdir().expect("...");
+        let dir_path = temp_dir.path();
+        let config_name = dir_path.join(".artifact_cleaner.toml");
+
+        let mut config = Config::new();
+        config.ignore.push(String::from("some_new_value"));
+
+        assert_ne!(config, Config::new());
+        let mut file = fs::File::create(&config_name).unwrap();
+        file.write_all(toml::to_string(&config).unwrap().as_bytes())
+            .unwrap();
+
+        let result = get_config(config_name);
+        assert_ne!(result, Config::new());
+        assert_eq!(config, result);
+    }
 }
