@@ -1,6 +1,8 @@
 use std::fs::{self};
 use std::io;
 use std::path::{Component, Path, PathBuf};
+use tracing::field::debug;
+use tracing::{debug, error, info, span, warn, Level};
 
 fn is_cleanable(dir_path: &Path, artifacts: &[String]) -> bool {
     if let Some(Component::Normal(x)) = dir_path.components().last() {
@@ -12,6 +14,7 @@ fn is_cleanable(dir_path: &Path, artifacts: &[String]) -> bool {
     false
 }
 
+#[tracing::instrument(skip_all,parent = None)]
 pub fn find_dirs(
     findings: &mut Vec<PathBuf>,
     dir: &Path,
@@ -19,7 +22,7 @@ pub fn find_dirs(
     max_depth: i32,
 ) -> io::Result<()> {
     if max_depth == 0 {
-        println!("Hit max depth");
+        debug!("Hit max depth in {:?}", dir);
         return Ok(());
     }
 
@@ -29,6 +32,7 @@ pub fn find_dirs(
             let path = entry.path();
             if path.is_dir() && !path.is_symlink() {
                 if is_cleanable(&path, artifacts) {
+                    debug!("Found {:?}", path);
                     findings.push(path.clone());
                 } else {
                     find_dirs(findings, &path, artifacts, max_depth - 1)?;
@@ -40,7 +44,7 @@ pub fn find_dirs(
 }
 
 pub fn delete_all_artifact(findings: &[PathBuf]) -> io::Result<()> {
-    println!("Deleting....");
+    info!("Starting deletion");
     todo!()
 }
 
