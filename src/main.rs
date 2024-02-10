@@ -102,8 +102,9 @@ fn run_cleaning(args: &RunArgs) -> () {
     let config: Config = get_config();
     debug!("{:#?}", &config);
 
-    // TODO: This must be set based on config.profile
-    let profile = config.py;
+    let profile = match args.profile {
+        Profile::Py => config.py,
+    };
 
     let mut findings: Vec<PathBuf> = Vec::new();
     let mut ignore = Vec::new();
