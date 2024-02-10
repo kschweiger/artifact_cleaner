@@ -36,6 +36,10 @@ struct RunArgs {
     /// If passed, the cleanable directories will be listed but not deleted
     #[arg(short, long)]
     dry_run: bool,
+
+    /// Maximum depth from the root the tool will look for artifacts
+    #[arg(short, long, default_value = "10")]
+    max_depth: u16,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum, Debug)]
@@ -63,7 +67,7 @@ fn run_cleaning(args: &RunArgs) -> () {
         args.root.as_path(),
         &profile.artifact_names,
         &ignore,
-        5,
+        args.max_depth,
     ) {
         Ok(()) => info!("Search completet"),
         Err(e) => error!("Error: {e:?}"),

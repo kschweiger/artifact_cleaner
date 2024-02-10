@@ -27,10 +27,14 @@ impl Config {
     pub fn new() -> Self {
         Self {
             py: ProfileConfig {
-                artifact_names: vec![String::from("__pycache__")],
+                artifact_names: vec![
+                    String::from("__pycache__"),
+                    String::from(".mypy_cache"),
+                    String::from(".ruff_cache"),
+                ],
                 ignore: vec![],
             },
-            ignore: vec![String::from(".git")],
+            ignore: vec![String::from(".git"), String::from(".github")],
         }
     }
 }

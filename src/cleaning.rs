@@ -32,7 +32,7 @@ pub fn find_dirs(
     dir: &Path,
     artifacts: &[String],
     ignore: &[String],
-    max_depth: i32,
+    max_depth: u16,
 ) -> io::Result<()> {
     if max_depth == 0 {
         debug!("Hit max depth in {:?}", dir);
