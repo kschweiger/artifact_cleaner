@@ -13,11 +13,13 @@ use tracing_subscriber::FmtSubscriber;
 #[derive(Serialize, Deserialize, Debug)]
 struct Config {
     py: ProfileConfig,
+    ignore: Vec<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 struct ProfileConfig {
     artifact_names: Vec<String>,
+    ignore: Vec<String>,
 }
 
 impl Config {
@@ -25,7 +27,9 @@ impl Config {
         Self {
             py: ProfileConfig {
                 artifact_names: vec![String::from("__pycache__")],
+                ignore: vec![],
             },
+            ignore: vec![String::from(".git")],
         }
     }
 }
@@ -98,12 +102,19 @@ fn run_cleaning(args: &RunArgs) -> () {
     let config: Config = get_config();
     debug!("{:#?}", &config);
 
+    // TODO: This must be set based on config.profile
+    let profile = config.py;
+
     let mut findings: Vec<PathBuf> = Vec::new();
+    let mut ignore = Vec::new();
+    ignore.extend(config.ignore);
+    ignore.extend(profile.ignore);
 
     match find_dirs(
         &mut findings,
         args.root.as_path(),
-        &config.py.artifact_names,
+        &profile.artifact_names,
+        &ignore,
         5,
     ) {
         Ok(()) => info!("Search completet"),
