@@ -35,6 +35,7 @@ pub struct ProfileConfig {
 
 impl Config {
     /// Creates a new Config instance with default values
+    #[must_use]
     pub fn new() -> Self {
         Self {
             py: ProfileConfig {
@@ -42,6 +43,7 @@ impl Config {
                     String::from("__pycache__"),
                     String::from(".mypy_cache"),
                     String::from(".ruff_cache"),
+                    String::from("dist"),
                 ],
                 ignore: vec![],
             },
@@ -72,6 +74,7 @@ impl Default for Config {
 ///
 /// # Panics
 /// Panics if the `directories::UserDirs` can not be retrieved.
+#[must_use]
 pub fn get_full_config_path() -> PathBuf {
     UserDirs::new()
         .expect("Could not retrieve user directory")
@@ -81,6 +84,7 @@ pub fn get_full_config_path() -> PathBuf {
 
 /// Get a config instance. Either loaded from the expected location if present or a
 /// instance with default values
+#[must_use]
 pub fn get_config(path: &PathBuf) -> Config {
     match fs::read_to_string(path) {
         Ok(file) => toml::from_str(&file).expect("Invalid toml config file"),

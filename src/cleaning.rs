@@ -60,7 +60,7 @@ pub fn find_dirs(
 
 /// Delete all passed directores
 pub fn delete_all_artifacts(findings: &[PathBuf]) {
-    info!("Starting deletion of {:?} directory", findings.len());
+    info!("Deleting {:?} directory", findings.len());
     for dir in findings {
         match fs::remove_dir_all(dir) {
             Ok(()) => debug!("Deleted: {:?}", dir),
@@ -152,7 +152,7 @@ mod tests {
         let artifact_dir_2 = dir_path.join("ignore_dir").join("artifact");
 
         fs::create_dir_all(&artifact_dir_1).expect("Failed to create directory");
-        fs::create_dir_all(&artifact_dir_2).expect("Failed to create directory");
+        fs::create_dir_all(artifact_dir_2).expect("Failed to create directory");
 
         let artifacts = vec![String::from("artifact")];
         let mut findings: Vec<PathBuf> = Vec::new();
@@ -175,7 +175,7 @@ mod tests {
         let artifact_dir_2_subdir = artifact_dir_2.join("some_other_dir");
 
         fs::create_dir_all(&artifact_dir_1).expect("Failed to create directory");
-        fs::create_dir_all(&artifact_dir_2_subdir).expect("Failed to create directory");
+        fs::create_dir_all(artifact_dir_2_subdir).expect("Failed to create directory");
 
         let findings = vec![artifact_dir_1.clone(), artifact_dir_2.clone()];
 

@@ -90,12 +90,12 @@ fn run_cleaning(args: &RunArgs) {
         Ok(()) => info!("Search completed"),
         Err(e) => error!("Error: {e:?}"),
     }
-    if !findings.is_empty() {
-        if args.dry_run {
-            info!("dry-run set. Found {:#?}", findings);
-        } else {
-            delete_all_artifacts(&findings);
-        }
+    if findings.is_empty() {
+        info!("No artifacts found.")
+    } else if args.dry_run {
+        info!("dry-run set. Found {:#?}", findings);
+    } else {
+        delete_all_artifacts(&findings);
     }
 }
 

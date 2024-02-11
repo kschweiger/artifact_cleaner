@@ -75,6 +75,7 @@ command = [
     "--color",
     "always",
     "--",
+    "run",
     ".",
     "py",
     "--dry-run",
