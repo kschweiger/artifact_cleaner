@@ -4,7 +4,7 @@
 use std::fs::{self};
 use std::io;
 use std::path::{Component, Path, PathBuf};
-use tracing::{debug, info};
+use tracing::{debug, error, info};
 
 fn dir_name_in_collection(dir_path: &Path, collection: &[String]) -> bool {
     if let Some(Component::Normal(x)) = dir_path.components().last() {
@@ -59,9 +59,15 @@ pub fn find_dirs(
 }
 
 /// Delete all passed directores
-pub fn delete_all_artifact(findings: &[PathBuf]) -> io::Result<()> {
-    info!("Starting deletion");
-    todo!()
+pub fn delete_all_artifacts(findings: &[PathBuf]) -> io::Result<()> {
+    info!("Starting deletion of {:?} directory", findings.len());
+    for dir in findings {
+        match fs::remove_dir_all(dir) {
+            Ok(()) => debug!("Deleted: {:?}", dir),
+            Err(e) => error!("Deleting {:?} returned {:?}", dir, e),
+        }
+    }
+    Ok(())
 }
 
 #[cfg(test)]
@@ -158,5 +164,30 @@ mod tests {
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0], artifact_dir_1);
+    }
+
+    #[test]
+    fn run_delete_all_artifact() {
+        let temp_dir = tempdir().expect("...");
+        let dir_path = temp_dir.path();
+
+        let artifact_dir_1 = dir_path.join("artifact");
+        let artifact_dir_2 = dir_path.join("some_sub_folder").join("artifact");
+        let artifact_dir_2_subdir = artifact_dir_2.join("some_other_dir");
+
+        fs::create_dir_all(&artifact_dir_1).expect("Failed to create directory");
+        fs::create_dir_all(&artifact_dir_2_subdir).expect("Failed to create directory");
+
+        let findings = vec![artifact_dir_1.clone(), artifact_dir_2.clone()];
+
+        assert!(artifact_dir_1.exists());
+        assert!(artifact_dir_2.exists());
+
+        let res = delete_all_artifacts(&findings);
+
+        assert!(res.is_ok());
+
+        assert!(!artifact_dir_1.exists());
+        assert!(!artifact_dir_2.exists());
     }
 }

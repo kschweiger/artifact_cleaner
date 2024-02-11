@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use artifact_cleaner::cleaning::{delete_all_artifact, find_dirs};
+use artifact_cleaner::cleaning::{delete_all_artifacts, find_dirs};
 use artifact_cleaner::{create_config, get_config, get_full_config_path, Config};
 use clap::{Args, Parser, Subcommand, ValueEnum};
 
@@ -73,14 +73,14 @@ fn run_cleaning(args: &RunArgs) -> () {
         &ignore,
         args.max_depth,
     ) {
-        Ok(()) => info!("Search completet"),
+        Ok(()) => info!("Search completed"),
         Err(e) => error!("Error: {e:?}"),
     }
     if !findings.is_empty() {
         if args.dry_run {
             info!("dry-run set. Found {:#?}", findings);
         } else {
-            delete_all_artifact(&findings).unwrap();
+            delete_all_artifacts(&findings).unwrap();
         }
     }
 }
