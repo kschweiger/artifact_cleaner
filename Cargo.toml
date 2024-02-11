@@ -1,6 +1,6 @@
 [package]
 name = "artifact_cleaner"
-version = "0.1.0"
+version = "0.0.0"
 authors = ["Korbinian Schweiger <korbinian.schweiger@gmail.com>"]
 description = "A tool to search progamming language specific artifiacts and deletem them"
 readme = "README.md"

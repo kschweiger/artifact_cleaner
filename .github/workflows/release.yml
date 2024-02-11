@@ -1,0 +1,64 @@
+on:
+    push:
+        tags:
+            - '*'
+
+name: Build package
+
+jobs:
+    build_linux:
+        name: Build 🐧
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                target:
+                    - aarch64-unknown-linux-musl
+                    - x86_64-unknown-linux-musl
+        steps:
+        - name: Setup
+          run : |
+            sudo apt-get install jq
+        - uses: actions/checkout@v2
+        - uses: actions-rs/toolchain@v1
+          with:
+            toolchain: stable
+            target: ${{ matrix.target }}
+            override: true
+        - uses: actions-rs/cargo@v1
+          with:
+            use-cross: true
+            command: build
+            args: --release --target=${{ matrix.target }}
+        - name: Build package
+          run: |
+            export NAME=$(cargo read-manifest |  jq -r '.name')
+            export VERSION=$(cargo read-manifest |  jq -r '.version')
+            export DIR=${NAME}_${VERSION}_${{ matrix.target }}
+            mkdir $DIR
+            cp target/${{ matrix.target }}/release/$NAME $DIR/
+            cp LICENSE $DIR/
+            cp README.md $DIR/
+            tar -czvf $DIR.tar.gz $DIR/
+        - name: Store the distribution packages
+          uses: actions/upload-artifact@v4
+          with:
+            name: release-linux-${{ matrix.target }}
+            path: ./*.tar.gz
+    release:
+        name: GitHub release 🦾
+        runs-on: ubuntu-latest
+        needs: [build_linux]
+        steps:
+            - uses: actions/checkout@v4
+            - name: Download all the dists
+              uses: actions/download-artifact@v4
+              with:
+                path: ./
+                merge-multiple: true
+            - name: List files
+              run: |
+                ls -a
+            - name: Release
+              uses: softprops/action-gh-release@v1
+              with:
+                files: ./*.tar.gz
