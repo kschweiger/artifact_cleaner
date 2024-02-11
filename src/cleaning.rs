@@ -59,7 +59,7 @@ pub fn find_dirs(
 }
 
 /// Delete all passed directores
-pub fn delete_all_artifacts(findings: &[PathBuf]) -> io::Result<()> {
+pub fn delete_all_artifacts(findings: &[PathBuf]) {
     info!("Starting deletion of {:?} directory", findings.len());
     for dir in findings {
         match fs::remove_dir_all(dir) {
@@ -67,7 +67,6 @@ pub fn delete_all_artifacts(findings: &[PathBuf]) -> io::Result<()> {
             Err(e) => error!("Deleting {:?} returned {:?}", dir, e),
         }
     }
-    Ok(())
 }
 
 #[cfg(test)]
@@ -81,19 +80,19 @@ mod tests {
         let path_str = "/some/path/artifact_dir_1";
         let test_path = PathBuf::from(path_str);
         let artifacts = vec![String::from("artifact_dir_1")];
-        assert!(dir_name_in_collection(&test_path, &artifacts))
+        assert!(dir_name_in_collection(&test_path, &artifacts));
     }
 
     #[test]
     fn run_is_cleanable_flag_no_match() {
         let test_path = PathBuf::from("/some/path/artifact_dir_1");
         let artifacts = vec![String::from("artifact_dir_2")];
-        assert!(!dir_name_in_collection(&test_path, &artifacts))
+        assert!(!dir_name_in_collection(&test_path, &artifacts));
     }
 
     #[test]
     fn run_find_dir() {
-        let temp_dir = tempdir().expect("...");
+        let temp_dir = tempdir().unwrap();
         let dir_path = temp_dir.path();
         let sub_dir_path = dir_path.join("subdir");
 
@@ -119,7 +118,7 @@ mod tests {
 
     #[test]
     fn run_find_dir_max_depth() {
-        let temp_dir = tempdir().expect("...");
+        let temp_dir = tempdir().unwrap();
         let dir_path: &Path = temp_dir.path();
         let sub_dir_path = dir_path
             .join("subdir_1")
@@ -143,7 +142,7 @@ mod tests {
 
     #[test]
     fn run_find_dir_test_ignore() {
-        let temp_dir = tempdir().expect("...");
+        let temp_dir = tempdir().unwrap();
         let dir_path = temp_dir.path();
         let sub_dir_path = dir_path.join("subdir");
 
@@ -168,7 +167,7 @@ mod tests {
 
     #[test]
     fn run_delete_all_artifact() {
-        let temp_dir = tempdir().expect("...");
+        let temp_dir = tempdir().unwrap();
         let dir_path = temp_dir.path();
 
         let artifact_dir_1 = dir_path.join("artifact");
@@ -183,9 +182,7 @@ mod tests {
         assert!(artifact_dir_1.exists());
         assert!(artifact_dir_2.exists());
 
-        let res = delete_all_artifacts(&findings);
-
-        assert!(res.is_ok());
+        delete_all_artifacts(&findings);
 
         assert!(!artifact_dir_1.exists());
         assert!(!artifact_dir_2.exists());

@@ -53,10 +53,10 @@ enum Profile {
     User,
 }
 
-fn run_cleaning(args: &RunArgs) -> () {
+fn run_cleaning(args: &RunArgs) {
     info!("Running cleaning in profile {:?}", args.profile);
     info!("Starting from root: {:?}", args.root);
-    let config: Config = get_config(get_full_config_path());
+    let config: Config = get_config(&get_full_config_path());
     debug!("{:#?}", &config);
 
     let profile = match args.profile {
@@ -72,7 +72,7 @@ fn run_cleaning(args: &RunArgs) -> () {
             "file, please create one by running the config subcommand.",
             "Otherwise check your configuration file."
         );
-        return ();
+        return;
     }
 
     let mut findings: Vec<PathBuf> = Vec::new();
@@ -94,13 +94,13 @@ fn run_cleaning(args: &RunArgs) -> () {
         if args.dry_run {
             info!("dry-run set. Found {:#?}", findings);
         } else {
-            delete_all_artifacts(&findings).unwrap();
+            delete_all_artifacts(&findings);
         }
     }
 }
 
-fn run_config_init() -> () {
-    match create_config(get_full_config_path()) {
+fn run_config_init() {
+    match create_config(&get_full_config_path()) {
         Ok(()) => (),
         Err(e) => error!("Default config could not be created: {e}"),
     }
