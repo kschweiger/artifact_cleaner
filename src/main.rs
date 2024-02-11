@@ -4,7 +4,7 @@ use artifact_cleaner::cleaning::{delete_all_artifacts, find_dirs};
 use artifact_cleaner::{create_config, get_config, get_full_config_path, Config};
 use clap::{Args, Parser, Subcommand, ValueEnum};
 
-use tracing::{debug, error, info, Level};
+use tracing::{debug, error, info, warn, Level};
 use tracing_subscriber::FmtSubscriber;
 
 #[derive(Parser, Debug)]
@@ -49,6 +49,8 @@ struct RunArgs {
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum, Debug)]
 enum Profile {
     Py,
+    Rust,
+    User,
 }
 
 fn run_cleaning(args: &RunArgs) -> () {
@@ -59,7 +61,19 @@ fn run_cleaning(args: &RunArgs) -> () {
 
     let profile = match args.profile {
         Profile::Py => config.py,
+        Profile::Rust => config.rust,
+        Profile::User => config.user,
     };
+
+    if profile.artifact_names.is_empty() {
+        warn!(
+            "{} {} {}",
+            "No artifacts defined. If using the **user** profile w/o a config",
+            "file, please create one by running the config subcommand.",
+            "Otherwise check your configuration file."
+        );
+        return ();
+    }
 
     let mut findings: Vec<PathBuf> = Vec::new();
     let mut ignore = Vec::new();

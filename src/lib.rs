@@ -16,6 +16,10 @@ pub mod cleaning;
 pub struct Config {
     /// Language specific configuration for the python profile
     pub py: ProfileConfig,
+    /// Language specific configuration for the rust profile
+    pub rust: ProfileConfig,
+    /// A default style profile that does nothing and is intended for custom usage by the user
+    pub user: ProfileConfig,
     /// List of language-independent directories to ignore
     pub ignore: Vec<String>,
 }
@@ -39,6 +43,14 @@ impl Config {
                     String::from(".mypy_cache"),
                     String::from(".ruff_cache"),
                 ],
+                ignore: vec![],
+            },
+            rust: ProfileConfig {
+                artifact_names: vec![String::from("target")],
+                ignore: vec![],
+            },
+            user: ProfileConfig {
+                artifact_names: vec![],
                 ignore: vec![],
             },
             ignore: vec![String::from(".git"), String::from(".github")],
