@@ -13,6 +13,10 @@ use tracing_subscriber::FmtSubscriber;
 struct Cli {
     #[command(subcommand)]
     command: Commands,
+
+    /// Set the level for the logger
+    #[arg(long, default_value = "Info")]
+    log_level: Level,
 }
 
 #[derive(Subcommand, Debug)]
@@ -34,11 +38,11 @@ struct RunArgs {
     profile: Profile,
 
     /// If passed, the cleanable directories will be listed but not deleted
-    #[arg(short, long)]
+    #[arg(long)]
     dry_run: bool,
 
     /// Maximum depth from the root the tool will look for artifacts
-    #[arg(short, long, default_value = "10")]
+    #[arg(long, default_value = "10")]
     max_depth: u16,
 }
 
@@ -89,15 +93,15 @@ fn run_config_init() -> () {
 }
 
 fn main() {
+    let cli = Cli::parse();
     let subscriber = FmtSubscriber::builder()
         // all spans/events with a level higher than TRACE (e.g, debug, info, warn, etc.)
         // will be written to stdout.
-        .with_max_level(Level::TRACE)
+        .with_max_level(cli.log_level)
         .finish();
 
     tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
 
-    let cli = Cli::parse();
     match &cli.command {
         Commands::Run(args) => run_cleaning(args),
         Commands::Config => run_config_init(),
