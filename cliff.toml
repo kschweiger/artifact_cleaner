@@ -60,6 +60,7 @@ commit_parsers = [
   { message = "^refactor", group = "<!-- 5 -->🔨 Refactor" },
   { message = "^test", group = "<!-- 6 --> 🧪 Testing" },
   { message = "^ci", group = "<!-- 7 --> ⚙️ Continuous Integration" },
+  { message = "^build", group = "<!-- 8 --> 🧱 Build" },
   { message = "^doc", group = "Documentation", skip = true },
   { message = "^style", group = "Styling", skip = true },
   { message = "^chore\\(release\\): prepare for", skip = true },

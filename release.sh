@@ -24,7 +24,7 @@ git add Cargo.toml Cargo.lock
 git commit -n -m "build: Bumped version to ${VERSION} :bookmark:"
 
 echo "Updating changelog"
-git cliff -o CHANGELOG.md
+git cliff -o CHANGELOG.md --tag ${VERSION}
 if [[ $? != 0 ]]
 then
   echo "Generating changelog failed. Exiting..."
