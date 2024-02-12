@@ -41,19 +41,19 @@ Options:
 #### Default config:
 
 ```toml
-ignore = [".git", ".github"]
+ignore_directories = [".git", ".github"]
 
 [py]
-artifact_names = ["__pycache__", ".mypy_cache", ".ruff_cache"]
-ignore = []
+artifact_directories = ["__pycache__", ".mypy_cache", ".ruff_cache", "dist"]
+ignore_directories = []
 
 [rust]
-artifact_names = ["target"]
-ignore = []
+artifact_directories = ["target"]
+ignore_directories = []
 
 [user]
-artifact_names = []
-ignore = []
+artifact_directories = []
+ignore_directories = []
 ```
 
 

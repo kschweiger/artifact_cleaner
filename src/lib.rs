@@ -21,16 +21,16 @@ pub struct Config {
     /// A default style profile that does nothing and is intended for custom usage by the user
     pub user: ProfileConfig,
     /// List of language-independent directories to ignore
-    pub ignore: Vec<String>,
+    pub ignore_directories: Vec<String>,
 }
 
 /// Configuration for a language-specific profile
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub struct ProfileConfig {
     /// List of language-dependent directories to remove
-    pub artifact_names: Vec<String>,
+    pub artifact_directories: Vec<String>,
     /// List of language-dependent directories to ignore
-    pub ignore: Vec<String>,
+    pub ignore_directories: Vec<String>,
 }
 
 impl Config {
@@ -39,23 +39,23 @@ impl Config {
     pub fn new() -> Self {
         Self {
             py: ProfileConfig {
-                artifact_names: vec![
+                artifact_directories: vec![
                     String::from("__pycache__"),
                     String::from(".mypy_cache"),
                     String::from(".ruff_cache"),
                     String::from("dist"),
                 ],
-                ignore: vec![],
+                ignore_directories: vec![],
             },
             rust: ProfileConfig {
-                artifact_names: vec![String::from("target")],
-                ignore: vec![],
+                artifact_directories: vec![String::from("target")],
+                ignore_directories: vec![],
             },
             user: ProfileConfig {
-                artifact_names: vec![],
-                ignore: vec![],
+                artifact_directories: vec![],
+                ignore_directories: vec![],
             },
-            ignore: vec![String::from(".git"), String::from(".github")],
+            ignore_directories: vec![String::from(".git"), String::from(".github")],
         }
     }
 }
@@ -149,7 +149,9 @@ mod tests {
         let config_name = dir_path.join(".artifact_cleaner.toml");
 
         let mut config = Config::new();
-        config.ignore.push(String::from("some_new_value"));
+        config
+            .ignore_directories
+            .push(String::from("some_new_value"));
 
         assert_ne!(config, Config::new());
         let mut file = fs::File::create(&config_name).unwrap();

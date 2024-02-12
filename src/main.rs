@@ -65,7 +65,7 @@ fn run_cleaning(args: &RunArgs) {
         Profile::User => config.user,
     };
 
-    if profile.artifact_names.is_empty() {
+    if profile.artifact_directories.is_empty() {
         warn!(
             "{} {} {}",
             "No artifacts defined. If using the **user** profile w/o a config",
@@ -77,13 +77,13 @@ fn run_cleaning(args: &RunArgs) {
 
     let mut findings: Vec<PathBuf> = Vec::new();
     let mut ignore = Vec::new();
-    ignore.extend(config.ignore);
-    ignore.extend(profile.ignore);
+    ignore.extend(config.ignore_directories);
+    ignore.extend(profile.ignore_directories);
 
     match find_dirs(
         &mut findings,
         args.root.as_path(),
-        &profile.artifact_names,
+        &profile.artifact_directories,
         &ignore,
         args.max_depth,
     ) {
